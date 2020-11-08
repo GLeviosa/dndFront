@@ -116,3 +116,5 @@ dist
 .pnp.*
 
 ./backend/node_modules
+./backend/data
+./client/node_modules

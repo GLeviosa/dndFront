@@ -64,8 +64,7 @@ export default class Register extends Component {
         
 
 
-        
-            
+
         return (
             <Container fluid="sm">
                 <Form>
@@ -82,7 +81,7 @@ export default class Register extends Component {
                     <FormGroup>
                         <Label>Password:</Label>
                         <Input type="password" name="password" id="password" placeholder="Password" value={this.state.user.password}
-                    onChange={this.handleChange} />
+                        onChange={this.handleChange} />
                     </FormGroup>
                     {errMsg}
                     

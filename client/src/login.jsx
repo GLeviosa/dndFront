@@ -7,7 +7,8 @@ import { Button, Form, FormGroup, Label, Input, Container } from 'reactstrap';
 export default class Login extends Component {
     constructor(props) {
         super(props)
-        this.state = {user : {
+        this.state = {
+            user : {
             id: "",
             username: "",
             email: "",
@@ -25,7 +26,7 @@ export default class Login extends Component {
         axios.post("http://localhost:3003/users/authenticate", this.state.user)
             .then(resp => {
                 if(Math.floor(resp.status/100) === 2) {
-                    console.log("response auth", resp.data)
+                    // console.log("response auth", resp.data)
                     this.setState((state) => {
                         state.user = resp.data.user
                         state.loggedStatus = resp.data.loggedStatus
