@@ -25,7 +25,7 @@ export default class Register extends Component {
         axios.post("http://localhost:3003/users/register", this.state.user)
             .then(resp => {
                 if(Math.floor(resp.status/100) === 2) {
-                    this.props.history.push("/")
+                    this.props.history.push("/login")
                 } 
                 console.log(resp)
             })
@@ -48,7 +48,7 @@ export default class Register extends Component {
     }
     
     test(event) {
-        this.props.history.push("/")
+        this.props.history.push("/login")
     }
 
     render() {
