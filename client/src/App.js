@@ -37,14 +37,14 @@ export default class App extends Component {
           <Switch>
             <Route 
             exact 
-            path={"/"} 
+            path={"/login"} 
             render={props => (
               <Login {...props} handleLogin={this.handleLogin} loggedStatus={this.state.loggedStatus} />
             )} 
             />
             <Route 
             exact 
-            path={"/main"}
+            path={"/"}
             render={props => (
               <Main {...props} state={this.state} />
             )} 

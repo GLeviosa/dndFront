@@ -32,7 +32,7 @@ export default class Login extends Component {
                         state.loggedStatus = resp.data.loggedStatus
                     })
                     this.props.handleLogin(this.state)
-                    this.props.history.push("/main")
+                    this.props.history.push("/")
                 }
             })
             .catch((erro) => {

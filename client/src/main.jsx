@@ -8,12 +8,13 @@ import classnames from 'classnames';
 export default class Login extends Component {
     constructor(props) {
         super(props);
-        let stdSel;
-        if (this.props.state.user.encounters.length > 0) {
-            stdSel = this.props.state.user.encounters[0].name
-        } else {
-            stdSel = ""
-        }
+        let stdSel = "";
+        if (this.props.state.user.encounters != null) {
+            if (this.props.state.user.encounters.length > 0) {
+                stdSel = this.props.state.user.encounters[0].name
+            }
+        } 
+        
         
         this.state = {
             listMonsters: [],
@@ -22,7 +23,8 @@ export default class Login extends Component {
                 "type": "fruit",
                 "alignment": "full neutral",
                 "challenge_rating": 0,
-                "hit_points": 420
+                "hit_points": "69",
+                "hit_dice": "4d20+2"
             }],
             activeTab: "1",
             encounter: {},
@@ -34,7 +36,15 @@ export default class Login extends Component {
             user: this.props.state.user,
             loggedUser: this.props.state.user.username,
             // dpOpen: false
-            encSelected: stdSel
+            encSelected: stdSel,
+            check: {
+                "type": false,
+                "alignment": false
+            },
+            monsterUrl: "https://api.open5e.com/monsters/?search=",
+            filter: "",
+            filtering: "",
+            proceed: true
             
         }
     
@@ -52,21 +62,81 @@ export default class Login extends Component {
         this.addMonster = this.addMonster.bind(this);
         this.removeMonster = this.removeMonster.bind(this);
         this.handleMonsterLife = this.handleMonsterLife.bind(this);
+        this.check = this.check.bind(this);
+        this.filter = this.filter.bind(this);
+        this.search = this.search.bind(this);
+        this.sleep = this.sleep.bind(this);
+    }
+
+    async check(event) {
+        this.setState({proceed: false})
+        await this.sleep(1000)
+        this.setState(state => {
+            state.data = [{
+                "name": "Aapple",
+                "type": "fruit",
+                "alignment": "full neutral",
+                "challenge_rating": 0,
+                "hit_points": "69",
+                "hit_dice": "4d20+2"
+            }]
+            state.proceed = true
+        })
+        var name = event.target.value
+        var url = "https://api.open5e.com/monsters/?ordering=" + name
+        console.log("URL PORRA", url)
+        this.getMonsters(url)
+    }
+
+    filter(event) {
+        var handleState = (state, event) => {
+            var filter = event.target.value
+            state.filter = filter
+        }
+        this.setState(handleState(this.state, event))
+        this.forceUpdate()
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async search() {
+        this.setState(state => {
+            state.proceed = false
+        })
+        await this.sleep(1000)
+        
+        this.setState(state => {
+            state.data = [{
+                "name": "Aapple",
+                "type": "fruit",
+                "alignment": "full neutral",
+                "challenge_rating": 0,
+                "hit_points": "69",
+                "hit_dice": "4d20+2"
+            }]
+            state.proceed = true
+        })
+        this.getMonsters(this.state.monsterUrl + this.state.filter)
     }
 
     getMonsters(url) {
+        console.log(url)
         axios.get(url)
             .then(resp => {
                 // console.log(resp.data.results)
                 var { data } = this.state
+                console.log("response of getmonster", resp.data.results)
                 var newdata = data.concat(resp.data.results)
                 // console.log("data",data)
                 this.setState({
                     data: newdata
                 })
                 url = resp.data.next
+                var proceed = this.state.proceed
                 // console.log("URL", url)
-                if (url){
+                if (url && proceed){
                     this.getMonsters(url)
                 } 
             })  
@@ -300,6 +370,7 @@ export default class Login extends Component {
         this.forceUpdate();
     }
     render() {
+
         // console.log("state", this.state)
         var monstersArray = this.state.data
         // console.log("monsterArray: ", monstersArray)
@@ -312,7 +383,7 @@ export default class Login extends Component {
                     <td>{alignment}</td>
                     <td>{challenge_rating}</td>
                     <td>{hit_points}/{hit_dice}</td>
-                    <Button color="success" value={name} onClick={this.addMonster}>+</Button>
+                    <td><Button color="success" value={name} onClick={this.addMonster}>+</Button></td>
                 </tr>
             )
         })
@@ -369,11 +440,30 @@ export default class Login extends Component {
         // console.log("props", this.props)
         // console.log("tableMonsters:", tableMonsters)
         let username;
+        let accSettings;
         if (this.props.state.loggedStatus) {
             username = this.state.loggedUser
+            accSettings = (
+                <Form>
+                    <FormGroup>
+                        <Label>Username</Label>
+                        <Input type="name" name="username" value={this.state.user.username} onChange={this.handleChange} /> 
+                    </FormGroup>
+                    <FormGroup>
+                        <Label>E-mail:</Label>
+                        <Input type="email" name="email" value={this.state.user.email} onChange={this.handleChange} />
+                    </FormGroup>
+                    <Button color="primary" onClick={this.editInfo}>Edit Info</Button>
+                </Form>
+            )
         } else {
             username = "Log In"
+            accSettings = (
+                <Label>Please <a href="http://localhost:3000/login">Log in</a> to see your info</Label>
+            )
         }
+
+ 
 
         const activeTab = this.state.activeTab
         // console.log("activeTab: ", activeTab)
@@ -411,17 +501,7 @@ export default class Login extends Component {
                             <Row>
                                 <Col sm="12">
                                     <h4>Account Settings</h4>
-                                    <Form>
-                                        <FormGroup>
-                                            <Label>Username</Label>
-                                            <Input type="name" name="username" value={this.state.user.username} onChange={this.handleChange} /> 
-                                        </FormGroup>
-                                        <FormGroup>
-                                            <Label>E-mail:</Label>
-                                            <Input type="email" name="email" value={this.state.user.email} onChange={this.handleChange} />
-                                        </FormGroup>
-                                        <Button color="primary" onClick={this.editInfo}>Edit Info</Button>
-                                    </Form>
+                                    {accSettings}
                                 </Col>
                             </Row>
                         </Container>
@@ -432,11 +512,15 @@ export default class Login extends Component {
                             <Table borderless striped>
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Type</th>
-                                        <th>Alignment</th>
-                                        <th>CR</th>
-                                        <th>Hit Points</th>
+                                        <th><Input type="text" onChange={this.filter} value={this.state.filter} /></th>
+                                        <th><Button id="filter" onClick={this.search}>Search</Button></th>
+                                    </tr>
+                                    <tr>
+                                        <th><Button outline value="name" onClick={this.check}>Name</Button></th>
+                                        <th><Button outline value="type" onClick={this.check}>Type</Button></th>
+                                        <th><Button outline value="alignment" onClick={this.check}>Alignment</Button></th>
+                                        <th><Button outline value="challenge_rating" onClick={this.check}>CR</Button></th>
+                                        <th><Button outline value="hit_points" onClick={this.check}>Hit Points</Button></th>
                                     </tr>
                                 </thead>
                                 <tbody> {tableMonsters} </tbody>
@@ -448,10 +532,16 @@ export default class Login extends Component {
                             <Row>
                                 <Col sm="12">
                                     <h4>Encounters List</h4> 
-                                    <Input type="text" placeholder="Your new encounter" value={this.state.newEncounter.name}
-                                        onChange={this.handleEncounter} />
+                                    <Form>
+                                        <FormGroup>
+                                            <Input type="text" placeholder="Your new encounter" value={this.state.newEncounter.name}
+                                                onChange={this.handleEncounter} />
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Button color="success" onClick={this.newEncounter}>Add Encounter</Button>
+                                        </FormGroup>                                            
+                                    </Form>
                                     
-                                    <Button color="Success" onClick={this.newEncounter}>Add Encounter</Button>
 
                                     <ListGroup>{listEncounters}</ListGroup>
                                 </Col>
